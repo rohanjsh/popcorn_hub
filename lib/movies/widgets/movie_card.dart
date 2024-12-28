@@ -61,8 +61,7 @@ class MovieCard extends StatelessWidget {
               child: InkWell(
                 onTap: onFavoritePressed,
                 customBorder: const CircleBorder(),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,

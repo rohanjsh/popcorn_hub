@@ -83,8 +83,8 @@ class _MoviesPageState extends State<MoviesPage> {
   Widget _buildOfflineMessage() {
     return const Center(
       child: Text(
-        'No Internet Connection',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        'Internet unavailable. Showing favorites only.',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
       ),
     );
   }
@@ -142,15 +142,15 @@ class _MoviesPageState extends State<MoviesPage> {
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildOfflineMessage(),
                           const SizedBox(height: 16),
+                          _buildOfflineMessage(),
                           const Text('No favorites available offline'),
                         ],
                       )
                     : Column(
                         children: [
-                          _buildOfflineMessage(),
                           const SizedBox(height: 16),
+                          _buildOfflineMessage(),
                           Expanded(child: _buildMovieGrid(favorites)),
                         ],
                       );
