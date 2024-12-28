@@ -8,6 +8,12 @@ View all the trending movies and shows
 
 ---
 
+## Demo
+
+https://github.com/user-attachments/assets/1fec7a5e-a08f-4973-83fd-44661aab1938
+
+
+
 ## Getting Started 🚀
 
 This project contains 3 flavors:
