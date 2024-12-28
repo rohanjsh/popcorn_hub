@@ -10,9 +10,9 @@ class Movie {
   factory Movie.fromJson(Map<String, dynamic> json) {
     return Movie(
       id: json['id'] as int,
-      title: json['title'] as String,
-      posterPath: json['poster_path'] as String,
-      overview: json['overview'] as String,
+      title: json['title'] as String?,
+      posterPath: json['poster_path'] as String?,
+      overview: json['overview'] as String?,
       isFavorite: json['isFavorite'] as bool? ?? false,
     );
   }

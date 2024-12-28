@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:popcorn_hub/movies/cubit/search/search_cubit.dart';
@@ -9,11 +8,19 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
   MovieSearchDelegate(this._searchCubit);
 
   final SearchCubit _searchCubit;
-  Timer? _debounce;
 
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
+      IconButton(
+        icon: const Icon(Icons.search),
+        onPressed: () async {
+          if (query.isNotEmpty) {
+            await _searchCubit.searchMovies(query);
+            if (context.mounted) showResults(context); // Force rebuild results
+          }
+        },
+      ),
       if (query.isNotEmpty)
         IconButton(
           icon: const Icon(Icons.clear),
@@ -39,8 +46,20 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return BlocBuilder<SearchCubit, SearchState>(
+    // Immediately trigger search when showing results if we have a query
+    if (query.isNotEmpty) {
+      _searchCubit.searchMovies(query);
+    }
+
+    return BlocConsumer<SearchCubit, SearchState>(
       bloc: _searchCubit,
+      listener: (context, state) {
+        if (state is SearchError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
       builder: (context, state) {
         if (state is SearchLoading) {
           return const Center(child: CircularProgressIndicator());
@@ -64,7 +83,13 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
                       )
                     : const SizedBox(width: 56),
                 title: Text(movie.title ?? ''),
-                onTap: () => close(context, movie),
+                onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Selected: ${movie.title}',
+                    ),
+                  ),
+                ),
               );
             },
           );
@@ -81,22 +106,23 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    _onSearchChanged();
-    return buildResults(context);
-  }
-
-  void _onSearchChanged() {
-    if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      if (query.isNotEmpty) {
-        _searchCubit.searchMovies(query);
-      }
-    });
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search, size: 64, color: Colors.grey),
+          SizedBox(height: 16),
+          Text(
+            'Type something and click search',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   void close(BuildContext context, Movie? result) {
-    _debounce?.cancel();
     _searchCubit.clearSearch();
     super.close(context, result);
   }
