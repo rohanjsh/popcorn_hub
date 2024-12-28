@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:popcorn_hub/connectivity/cubit/connectivity_cubit.dart';
 import 'package:popcorn_hub/movies/cubit/movies_cubit.dart';
 import 'package:popcorn_hub/movies/cubit/search/search_cubit.dart';
 import 'package:popcorn_hub/movies/models/movie.dart';
@@ -79,65 +80,98 @@ class _MoviesPageState extends State<MoviesPage> {
     );
   }
 
+  Widget _buildOfflineMessage() {
+    return const Center(
+      child: Text(
+        'No Internet Connection',
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trending Movies'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () async {
-              final searchCubit = context.read<SearchCubit>();
-              final movie = await showSearch(
-                context: context,
-                delegate: MovieSearchDelegate(searchCubit),
-              );
-              if (movie != null && mounted) {
-                // Handle selected movie (e.g., navigate to details)
+          BlocBuilder<ConnectivityCubit, ConnectivityStatus>(
+            builder: (context, state) {
+              if (state == ConnectivityStatus.disconnected) {
+                return const SizedBox.shrink();
               }
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.favorite),
-            onPressed: () {
-              context.read<MoviesCubit>().toggleFavoriteFilter();
+              return Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () async {
+                      final searchCubit = context.read<SearchCubit>();
+                      final movie = await showSearch(
+                        context: context,
+                        delegate: MovieSearchDelegate(searchCubit),
+                      );
+                      if (movie != null && mounted) {
+                        // Handle selected movie
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.favorite),
+                    onPressed: () {
+                      context.read<MoviesCubit>().toggleFavoriteFilter();
+                    },
+                  ),
+                ],
+              );
             },
           ),
         ],
       ),
-      body: BlocBuilder<MoviesCubit, MoviesState>(
-        builder: (context, state) {
-          if (state is MoviesInitial ||
-              (state is MoviesLoading && !_isLoadingMore)) {
-            return const Center(child: CircularProgressIndicator());
+      body: BlocConsumer<ConnectivityCubit, ConnectivityStatus>(
+        listener: (context, connectivityState) {
+          if (connectivityState == ConnectivityStatus.connected) {
+            context.read<MoviesCubit>().loadMovies();
           }
+        },
+        builder: (context, connectivityState) {
+          return BlocBuilder<MoviesCubit, MoviesState>(
+            builder: (context, state) {
+              if (connectivityState == ConnectivityStatus.disconnected) {
+                final favorites = context.read<MoviesCubit>().getFavorites();
+                return favorites.isEmpty
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildOfflineMessage(),
+                          const SizedBox(height: 16),
+                          const Text('No favorites available offline'),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          _buildOfflineMessage(),
+                          const SizedBox(height: 16),
+                          Expanded(child: _buildMovieGrid(favorites)),
+                        ],
+                      );
+              }
 
-          if (state is MoviesOffline) {
-            return Column(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    'Device offline, but you can still view your favourites',
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Expanded(child: _buildMovieGrid(state.favoriteMovies)),
-              ],
-            );
-          }
+              if (state is MoviesInitial ||
+                  (state is MoviesLoading && !_isLoadingMore)) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          if (state is MoviesError && !_isLoadingMore) {
-            return Center(child: Text(state.message));
-          }
+              if (state is MoviesLoaded) {
+                return _buildMovieGrid(state.movies);
+              }
 
-          if (state is MoviesLoaded) {
-            return _buildMovieGrid(state.movies);
-          }
+              if (state is MoviesError && !_isLoadingMore) {
+                return Center(child: Text(state.message));
+              }
 
-          return const SizedBox.shrink();
+              return const SizedBox.shrink();
+            },
+          );
         },
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:popcorn_hub/connectivity/cubit/connectivity_cubit.dart';
 import 'package:popcorn_hub/l10n/l10n.dart';
 import 'package:popcorn_hub/movies/cubit/movies_cubit.dart';
 import 'package:popcorn_hub/movies/cubit/search/search_cubit.dart';
@@ -16,6 +17,9 @@ class App extends StatelessWidget {
       create: (context) => MoviesRepository(Dio()),
       child: MultiBlocProvider(
         providers: [
+          BlocProvider(
+            create: (context) => ConnectivityCubit(),
+          ),
           BlocProvider(
             create: (context) => MoviesCubit(
               context.read<MoviesRepository>(),

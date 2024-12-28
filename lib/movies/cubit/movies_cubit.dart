@@ -1,4 +1,3 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:popcorn_hub/movies/models/movie.dart';
@@ -14,12 +13,6 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
   bool _isLoading = false;
   bool _showingFavorites = false;
 
-  Future<bool> _checkConnectivity() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    return connectivityResult.contains(ConnectivityResult.mobile) ||
-        connectivityResult.contains(ConnectivityResult.wifi);
-  }
-
   @override
   MoviesState? fromJson(Map<String, dynamic> json) {
     try {
@@ -28,7 +21,6 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
             .map((m) => Movie.fromJson(m as Map<String, dynamic>))
             .toList();
 
-        // Restore favorites state
         if (json['favorites'] != null) {
           final favoriteIds = List<int>.from(json['favorites'] as List);
           for (final movie in _movies) {
@@ -36,7 +28,10 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
           }
         }
 
-        return MoviesLoaded(_movies, isShowingFavorites: _showingFavorites);
+        return MoviesLoaded(
+          _movies,
+          isShowingFavorites: _showingFavorites,
+        );
       }
     } catch (e) {
       debugPrint('Error loading from storage: $e');
@@ -60,26 +55,10 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
 
   Future<void> loadMovies() async {
     try {
-      final isOnline = await _checkConnectivity();
-      if (!isOnline) {
-        final favorites = getFavorites();
-        // Load from cached data if available
-        if (favorites.isEmpty && _movies.isEmpty) {
-          final cached = fromJson(toJson(state) ?? {});
-          if (cached != null) {
-            emit(MoviesOffline(getFavorites()));
-            return;
-          }
-        }
-        emit(MoviesOffline(favorites));
-        return;
-      }
-
-      _currentPage = 1; // Reset page when loading fresh
+      _currentPage = 1;
       emit(MoviesLoading());
       final newMovies = await _repository.getTrendingMovies(_currentPage);
 
-      // Preserve favorite status for existing movies
       final existingFavorites = getFavorites();
       for (final movie in newMovies) {
         movie.isFavorite =
@@ -89,7 +68,10 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
       _movies = newMovies;
       emit(MoviesLoaded(_movies, isShowingFavorites: _showingFavorites));
     } catch (e) {
-      emit(MoviesError('Failed to load movies'));
+      final favorites = getFavorites();
+      emit(
+        MoviesOffline(favorites),
+      );
     }
   }
 
@@ -99,9 +81,12 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
     if (state is MoviesLoaded) {
       emit(MoviesLoaded(_movies, isShowingFavorites: _showingFavorites));
     } else if (state is MoviesOffline) {
-      emit(MoviesOffline(getFavorites()));
+      emit(
+        MoviesOffline(
+          getFavorites(),
+        ),
+      );
     }
-    // Force save to storage
     emit(state);
   }
 
@@ -113,10 +98,11 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
       final newMovies = await _repository.getTrendingMovies(_currentPage + 1);
       _currentPage++;
       _movies = [..._movies, ...newMovies];
-      emit(MoviesLoaded(_movies));
+      emit(
+        MoviesLoaded(_movies),
+      );
     } catch (e) {
-      // Don't emit error on pagination failure
-      // Optionally show a snackbar or toast
+      // Show a snackbar or toast
     } finally {
       _isLoading = false;
     }
@@ -129,9 +115,18 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
   void toggleFavoriteFilter() {
     _showingFavorites = !_showingFavorites;
     if (_showingFavorites) {
-      emit(MoviesLoaded(getFavorites(), isShowingFavorites: true));
+      emit(
+        MoviesLoaded(
+          getFavorites(),
+          isShowingFavorites: true,
+        ),
+      );
     } else {
-      emit(MoviesLoaded(_movies, isShowingFavorites: false));
+      emit(
+        MoviesLoaded(
+          _movies,
+        ),
+      );
     }
   }
 }
