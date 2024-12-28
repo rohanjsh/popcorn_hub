@@ -8,15 +8,43 @@ import 'package:popcorn_hub/feature/movies/widgets/movie_grid.dart';
 import 'package:popcorn_hub/feature/movies/widgets/movie_search_delegate.dart';
 import 'package:popcorn_hub/feature/movies/widgets/offline_message.dart';
 
+/// The main page for displaying trending movies and favorites.
+///
+/// This page provides the following features:
+/// * Display of trending movies in a grid layout
+/// * Infinite scrolling for loading more movies
+/// * Search functionality
+/// * Offline mode support
+/// * Favorites toggle and display
+///
+/// Example usage:
+/// ```dart
+/// MaterialApp(
+///   home: BlocProvider(
+///     create: (context) => MoviesCubit(),
+///     child: const MoviesPage(),
+///   ),
+/// )
+/// ```
 class MoviesPage extends StatefulWidget {
+  /// Creates a movies page.
   const MoviesPage({super.key});
 
   @override
   State<MoviesPage> createState() => _MoviesPageState();
 }
 
+/// The state for [MoviesPage].
+///
+/// Handles:
+/// * Scroll controller management
+/// * Infinite scrolling logic
+/// * UI state management
 class _MoviesPageState extends State<MoviesPage> {
+  /// Controller for handling scroll events and pagination.
   final _scrollController = ScrollController();
+
+  /// Flag to track if more movies are being loaded.
   bool _isLoadingMore = false;
 
   @override
@@ -32,6 +60,9 @@ class _MoviesPageState extends State<MoviesPage> {
     super.dispose();
   }
 
+  /// Handles scroll events for infinite scrolling.
+  ///
+  /// Triggers loading of more movies when user scrolls near the bottom of the list.
   void _onScroll() {
     final cubit = context.read<MoviesCubit>();
     if (!_isLoadingMore &&

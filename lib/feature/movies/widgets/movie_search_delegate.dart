@@ -4,11 +4,35 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:popcorn_hub/feature/movies/cubit/search/search_cubit.dart';
 import 'package:popcorn_hub/feature/movies/models/movie.dart';
 
+/// A search delegate that handles movie search functionality.
+///
+/// This delegate provides a search interface for movies, including:
+/// * Search suggestions
+/// * Search results display
+/// * Error handling
+/// * Loading states
+///
+/// Example usage:
+/// ```dart
+/// showSearch(
+///   context: context,
+///   delegate: MovieSearchDelegate(searchCubit),
+/// );
+/// ```
 class MovieSearchDelegate extends SearchDelegate<Movie?> {
+  /// Creates a movie search delegate.
+  ///
+  /// Requires a [SearchCubit] instance to handle the search state management.
   MovieSearchDelegate(this._searchCubit);
 
+  /// The cubit responsible for managing the search state.
   final SearchCubit _searchCubit;
 
+  /// Builds the actions shown in the search bar.
+  ///
+  /// Returns a list of widgets that includes:
+  /// * A search button that triggers the search
+  /// * A clear button that appears when there's text input
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -33,6 +57,9 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
     ];
   }
 
+  /// Builds the leading widget in the search bar.
+  ///
+  /// Returns a back button that clears the search and closes the search interface.
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
@@ -44,6 +71,13 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
     );
   }
 
+  /// Builds the search results view.
+  ///
+  /// Shows different widgets based on the search state:
+  /// * Loading indicator while searching
+  /// * List of movie results when search is complete
+  /// * Error message if search fails
+  /// * Empty message if no results found
   @override
   Widget buildResults(BuildContext context) {
     // Immediately trigger search when showing results if we have a query
@@ -107,6 +141,9 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
     );
   }
 
+  /// Builds the search suggestions view.
+  ///
+  /// Displays a centered search icon and hint text when no search is performed.
   @override
   Widget buildSuggestions(BuildContext context) {
     return Center(
@@ -124,6 +161,9 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
     );
   }
 
+  /// Closes the search interface and clears the search state.
+  ///
+  /// This override ensures the search state is cleared when the search interface is closed.
   @override
   void close(BuildContext context, Movie? result) {
     _searchCubit.clearSearch();

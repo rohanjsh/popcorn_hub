@@ -3,14 +3,42 @@ import 'package:flutter/material.dart';
 import 'package:popcorn_hub/core/api/api_config.dart';
 import 'package:popcorn_hub/feature/movies/models/movie.dart';
 
+/// A card widget that displays a movie's poster and title.
+///
+/// This widget creates a visually appealing card with:
+/// * Movie poster image with loading and error states
+/// * Movie title with ellipsis for overflow
+/// * Favorite toggle button
+///
+/// Example usage:
+/// ```dart
+/// MovieCard(
+///   movie: Movie(
+///     title: 'Movie Title',
+///     posterPath: '/path/to/poster.jpg',
+///     isFavorite: false,
+///   ),
+///   onFavoritePressed: () {
+///     // Handle favorite toggle
+///   },
+/// )
+/// ```
 class MovieCard extends StatelessWidget {
+  /// Creates a movie card.
+  ///
+  /// Requires:
+  /// * [movie] - The movie data to display
+  /// * [onFavoritePressed] - Callback when the favorite button is pressed
   const MovieCard({
     required this.movie,
     required this.onFavoritePressed,
     super.key,
   });
 
+  /// The movie data to display in the card.
   final Movie movie;
+
+  /// Callback function when the favorite button is pressed.
   final VoidCallback onFavoritePressed;
 
   @override

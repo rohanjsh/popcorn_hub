@@ -2,7 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:popcorn_hub/feature/movies/models/movie.dart';
 import 'package:popcorn_hub/feature/movies/widgets/movie_card.dart';
 
+/// A grid view that displays a collection of movies.
+///
+/// This widget creates a responsive grid of movie cards with infinite scrolling
+/// capability and loading indicators.
+///
+/// Example usage:
+/// ```dart
+/// MovieGrid(
+///   movies: moviesList,
+///   scrollController: scrollController,
+///   isLoadingMore: false,
+///   onFavoritePressed: (movie) {
+///     // Handle favorite toggle
+///   },
+/// )
+/// ```
 class MovieGrid extends StatelessWidget {
+  /// Creates a movie grid.
+  ///
+  /// All parameters are required:
+  /// * [movies] - The list of movies to display
+  /// * [scrollController] - Controller for handling scroll events
+  /// * [isLoadingMore] - Indicates if more items are being loaded
+  /// * [onFavoritePressed] - Callback when a movie's favorite status is toggled
   const MovieGrid({
     required this.movies,
     required this.scrollController,
@@ -10,11 +33,20 @@ class MovieGrid extends StatelessWidget {
     required this.onFavoritePressed,
     super.key,
   });
+
+  /// The list of movies to display in the grid.
   final List<Movie> movies;
+
+  /// Controller for handling scroll events and pagination.
   final ScrollController scrollController;
+
+  /// Indicates whether more movies are being loaded.
   final bool isLoadingMore;
-  final void Function(Movie)
-      onFavoritePressed; // Updated with explicit return type
+
+  /// Callback function when a movie's favorite status is toggled.
+  ///
+  /// Takes a [Movie] parameter and returns void.
+  final void Function(Movie) onFavoritePressed;
 
   @override
   Widget build(BuildContext context) {

@@ -5,14 +5,47 @@ import 'package:popcorn_hub/feature/movies/repository/movies_repository.dart';
 
 part 'movies_state.dart';
 
+/// A Cubit that manages the movie list functionality with persistence support.
+///
+/// This cubit handles operations related to movies including:
+/// - Loading trending movies
+/// - Managing favorite movies
+/// - Pagination
+/// - Offline support
+/// - State persistence
+///
+/// Example usage:
+/// ```dart
+/// final moviesCubit = MoviesCubit(moviesRepository);
+///
+/// // Load initial movies
+/// await moviesCubit.loadMovies();
+///
+/// // Toggle favorite status
+/// moviesCubit.toggleFavorite(movie);
+///
+/// // Load more movies (pagination)
+/// await moviesCubit.loadMore();
+///
+/// // Toggle favorites filter
+/// moviesCubit.toggleFavoriteFilter();
+/// ```
 class MoviesCubit extends HydratedCubit<MoviesState> {
+  /// Creates a new instance of [MoviesCubit].
+  ///
+  /// Requires a [MoviesRepository] to handle movie data operations.
   MoviesCubit(this._repository) : super(MoviesInitial());
+
   final MoviesRepository _repository;
   List<Movie> _movies = [];
   int _currentPage = 1;
   bool _isLoading = false;
   bool _showingFavorites = false;
 
+  /// Restores the cubit state from storage.
+  ///
+  /// This method is part of the [HydratedBloc] functionality and is called
+  /// automatically when the app starts to restore the previous state.
   @override
   MoviesState? fromJson(Map<String, dynamic> json) {
     try {
@@ -39,6 +72,10 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
     return null;
   }
 
+  /// Converts the current state to JSON for persistence.
+  ///
+  /// This method is part of the [HydratedBloc] functionality and is called
+  /// automatically when the state changes to persist the new state.
   @override
   Map<String, dynamic>? toJson(MoviesState state) {
     if (state is MoviesLoaded || state is MoviesOffline) {
@@ -53,6 +90,11 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
     return null;
   }
 
+  /// Loads the initial set of trending movies.
+  ///
+  /// - Emits [MoviesLoading] while fetching
+  /// - On success, emits [MoviesLoaded] with the fetched movies
+  /// - On failure, emits [MoviesOffline] with available favorite movies
   Future<void> loadMovies() async {
     try {
       _currentPage = 1;
@@ -75,22 +117,36 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
     }
   }
 
+  /// Toggles the favorite status of a movie.
+  ///
+  /// Updates the UI state based on whether favorites filter is active.
+  ///
+  /// Example:
+  /// ```dart
+  /// moviesCubit.toggleFavorite(movie);
+  /// ```
   Future<void> toggleFavorite(Movie movie) async {
     movie.isFavorite = !movie.isFavorite;
 
     if (state is MoviesLoaded) {
       if (_showingFavorites) {
-        // When showing favorites, only show favorite movies
         emit(MoviesLoaded(getFavorites(), isShowingFavorites: true));
       } else {
-        // When showing all movies, maintain the full list
-        emit(MoviesLoaded(_movies, isShowingFavorites: false));
+        emit(
+          MoviesLoaded(
+            _movies,
+          ),
+        );
       }
     } else if (state is MoviesOffline) {
       emit(MoviesOffline(getFavorites()));
     }
   }
 
+  /// Loads the next page of movies (pagination).
+  ///
+  /// This method handles loading additional movies when the user
+  /// scrolls to the end of the current list.
   Future<void> loadMore() async {
     if (_isLoading || state is! MoviesLoaded) return;
 
@@ -109,10 +165,19 @@ class MoviesCubit extends HydratedCubit<MoviesState> {
     }
   }
 
+  /// Returns a list of all favorite movies.
+  ///
+  /// Example:
+  /// ```dart
+  /// final favorites = moviesCubit.getFavorites();
+  /// ```
   List<Movie> getFavorites() {
     return _movies.where((movie) => movie.isFavorite).toList();
   }
 
+  /// Toggles between showing all movies and showing only favorites.
+  ///
+  /// Updates the state to reflect the current filter selection.
   void toggleFavoriteFilter() {
     _showingFavorites = !_showingFavorites;
     if (_showingFavorites) {
