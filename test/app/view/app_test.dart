@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:popcorn_hub/app/app.dart';
-import 'package:popcorn_hub/movies/view/movies_page.dart';
+import 'package:popcorn_hub/feature/app/app.dart';
+import 'package:popcorn_hub/feature/movies/view/movies_page.dart';
 
 void main() {
   group('App', () {

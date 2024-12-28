@@ -1,7 +1,57 @@
 {
     "@@locale": "en",
-    "counterAppBarTitle": "Counter",
-    "@counterAppBarTitle": {
-        "description": "Text shown in the AppBar of the Counter Page"
+    "trendingMoviesTitle": "Trending Movies",
+    "@trendingMoviesTitle": {
+        "description": "Title shown in the AppBar of the trending movies page"
+    },
+    "noResultsFound": "No results found",
+    "@noResultsFound": {
+        "description": "Message shown when search returns no results"
+    },
+    "searchHintText": "Type something and click search",
+    "@searchHintText": {
+        "description": "Hint text shown in the search suggestions view"
+    },
+    "selectedMovie": "Selected: {movieTitle}",
+    "@selectedMovie": {
+        "description": "Message shown when a movie is selected from search results",
+        "placeholders": {
+            "movieTitle": {
+                "type": "String",
+                "example": "The Dark Knight"
+            }
+        }
+    },
+    "noFavoritesOffline": "No favorites available offline",
+    "@noFavoritesOffline": {
+        "description": "Message shown when no favorite movies are available in offline mode"
+    },
+    "offlineMessage": "Internet unavailable. Showing favorites only.",
+    "@offlineMessage": {
+        "description": "Message shown when device is offline"
+    },
+    "failedToFetchMovies": "Failed to fetch movies",
+    "@failedToFetchMovies": {
+        "description": "Error message shown when movie fetching fails"
+    },
+    "failedToSearchMovies": "Failed to search movies: {error}",
+    "@failedToSearchMovies": {
+        "description": "Error message shown when movie search fails",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Network error"
+            }
+        }
+    },
+    "networkError": "Network error: {message}",
+    "@networkError": {
+        "description": "Error message shown when a network error occurs",
+        "placeholders": {
+            "message": {
+                "type": "String",
+                "example": "Connection timeout"
+            }
+        }
     }
 }
