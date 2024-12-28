@@ -1,9 +1,9 @@
 class Movie {
   Movie({
     required this.id,
-    required this.title,
-    required this.posterPath,
-    required this.overview,
+    this.title,
+    this.posterPath,
+    this.overview,
     this.isFavorite = false,
   });
 
@@ -17,9 +17,9 @@ class Movie {
     );
   }
   final int id;
-  final String title;
-  final String posterPath;
-  final String overview;
+  final String? title;
+  final String? posterPath;
+  final String? overview;
   bool isFavorite;
 
   Map<String, dynamic> toJson() => {

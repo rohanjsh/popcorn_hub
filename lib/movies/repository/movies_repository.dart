@@ -26,4 +26,35 @@ class MoviesRepository {
       throw Exception('Failed to fetch movies');
     }
   }
+
+  Future<List<Movie>> searchMovies(String query) async {
+    try {
+      final response = await _dio.get(
+        'https://api.themoviedb.org/3/search/movie',
+        queryParameters: {
+          'query': query,
+          'page': 1,
+          'include_adult': false,
+          'language': 'en-US',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Server returned ${response.statusCode}');
+      }
+
+      final results = response.data['results'] as List?;
+      if (results == null) {
+        throw Exception('Invalid response format');
+      }
+
+      return results
+          .map((json) => Movie.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw Exception('Network error: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to search movies: $e');
+    }
+  }
 }
