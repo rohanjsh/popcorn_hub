@@ -107,10 +107,25 @@ class _MoviesPageState extends State<MoviesPage> {
                         );
                       },
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.favorite),
-                      onPressed: () {
-                        context.read<MoviesCubit>().toggleFavoriteFilter();
+                    BlocBuilder<MoviesCubit, MoviesState>(
+                      buildWhen: (previous, current) =>
+                          previous is MoviesLoaded &&
+                          current is MoviesLoaded &&
+                          previous.isShowingFavorites !=
+                              current.isShowingFavorites,
+                      builder: (context, state) {
+                        return IconButton(
+                          icon: Icon(
+                            Icons.favorite,
+                            color: state is MoviesLoaded &&
+                                    state.isShowingFavorites
+                                ? Colors.red
+                                : Colors.grey,
+                          ),
+                          onPressed: () {
+                            context.read<MoviesCubit>().toggleFavoriteFilter();
+                          },
+                        );
                       },
                     ),
                   ],

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -112,10 +113,13 @@ class MovieSearchDelegate extends SearchDelegate<Movie?> {
               final movie = state.movies[index];
               return ListTile(
                 leading: (movie.posterPath ?? '').isNotEmpty
-                    ? Image.network(
-                        'https://image.tmdb.org/t/p/w92${movie.posterPath}',
+                    ? CachedNetworkImage(
+                        imageUrl:
+                            'https://image.tmdb.org/t/p/w92${movie.posterPath}',
                         width: 56,
-                        errorBuilder: (_, __, ___) => const SizedBox(width: 56),
+                        placeholder: (context, url) => const SizedBox(
+                          width: 56,
+                        ),
                       )
                     : const SizedBox(width: 56),
                 title: Text(movie.title ?? ''),
